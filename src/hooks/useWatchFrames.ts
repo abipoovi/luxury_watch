@@ -25,25 +25,24 @@ export interface WatchFramesState {
   subscribeFrameLoaded: (listener: (loadedIndex: number) => void) => () => void;
 }
 
-const ANCHOR_STEP = 20;
-const BOOT_WINDOW_COUNT = 22;
-const MAX_CONCURRENT_REQUESTS = 6;
-const ACTIVE_WINDOW_RADIUS = 45;
+const ANCHOR_STEP = 15;
+const BOOT_WINDOW_COUNT = 24;
+const MAX_CONCURRENT_REQUESTS = 8;
+const ACTIVE_WINDOW_RADIUS = 60;
 
 /**
- * Determines a conservative decoded-bitmap cache cap based on hardware memory
- * so we never hold all 300 full-resolution decoded images in GPU/RAM on
- * memory-constrained devices while maintaining smooth scrub playback.
+ * High-capacity decoded-bitmap cache cap to maintain buttery 60/120fps scrubbing
+ * with zero stutter across desktop and mobile.
  */
 function getAdaptiveCacheLimit(): number {
-  if (typeof navigator === 'undefined') return 60;
+  if (typeof navigator === 'undefined') return 120;
   const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
   const isNarrow = typeof window !== 'undefined' && window.innerWidth < 768;
 
-  if (deviceMemory && deviceMemory <= 2) return 35;
-  if (deviceMemory && deviceMemory <= 4) return 50;
-  if (isNarrow) return 45;
-  return 80;
+  if (deviceMemory && deviceMemory <= 2) return 60;
+  if (deviceMemory && deviceMemory <= 4) return 90;
+  if (isNarrow) return 80;
+  return 160;
 }
 
 function isAnchorFrame(index: number): boolean {
@@ -74,7 +73,6 @@ function disposeEntry(entry: CachedEntry): void {
 export function useWatchFrames(): WatchFramesState {
   const [isBootReady, setIsBootReady] = useState(false);
   const [bootProgress, setBootProgress] = useState(0);
-  const [cachedCount, setCachedCount] = useState(0);
 
   const cacheRef = useRef<Map<number, CachedEntry>>(new Map());
   const inFlightRef = useRef<Map<number, AbortController>>(new Map());
@@ -197,7 +195,6 @@ export function useWatchFrames(): WatchFramesState {
       }
 
       evictIfNeeded();
-      setCachedCount(cacheRef.current.size);
 
       if (bootIndicesRef.current.has(index)) {
         bootLoadedRef.current.add(index);
@@ -418,7 +415,7 @@ export function useWatchFrames(): WatchFramesState {
   return {
     isBootReady,
     bootProgress,
-    cachedCount,
+    cachedCount: cacheRef.current.size,
     totalFrames: TOTAL_FRAMES,
     getBestFrame,
     requestWindowAround,

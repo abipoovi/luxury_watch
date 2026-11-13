@@ -99,50 +99,6 @@ export const WatchCanvas = forwardRef<WatchCanvasHandle, WatchCanvasProps>(
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(lookup.frame, dx, dy, dw, dh);
-
-        // Soft edge feather only on edges inside the viewport so warm key-light flares
-        // dissolve seamlessly into the obsidian 100vh stage without hard seams.
-        if (dy > 1) {
-          const featherY = Math.max(18, Math.min(48, dh * 0.12));
-
-          const topGrad = ctx.createLinearGradient(0, dy - 1, 0, dy + featherY);
-          topGrad.addColorStop(0, '#050402');
-          topGrad.addColorStop(1, 'rgba(5, 4, 2, 0)');
-          ctx.fillStyle = topGrad;
-          ctx.fillRect(dx - 2, dy - 2, dw + 4, featherY + 4);
-
-          const bottomGrad = ctx.createLinearGradient(
-            0,
-            dy + dh - featherY,
-            0,
-            dy + dh + 1
-          );
-          bottomGrad.addColorStop(0, 'rgba(5, 4, 2, 0)');
-          bottomGrad.addColorStop(1, '#050402');
-          ctx.fillStyle = bottomGrad;
-          ctx.fillRect(dx - 2, dy + dh - featherY, dw + 4, featherY + 4);
-        }
-
-        if (dx > 1) {
-          const featherX = Math.max(18, Math.min(56, dw * 0.08));
-
-          const leftGrad = ctx.createLinearGradient(dx - 1, 0, dx + featherX, 0);
-          leftGrad.addColorStop(0, '#050402');
-          leftGrad.addColorStop(1, 'rgba(5, 4, 2, 0)');
-          ctx.fillStyle = leftGrad;
-          ctx.fillRect(dx - 2, dy - 2, featherX + 4, dh + 4);
-
-          const rightGrad = ctx.createLinearGradient(
-            dx + dw - featherX,
-            0,
-            dx + dw + 1,
-            0
-          );
-          rightGrad.addColorStop(0, 'rgba(5, 4, 2, 0)');
-          rightGrad.addColorStop(1, '#050402');
-          ctx.fillStyle = rightGrad;
-          ctx.fillRect(dx + dw - featherX, dy - 2, featherX + 4, dh + 4);
-        }
       },
       [getBestFrame]
     );

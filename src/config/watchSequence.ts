@@ -41,7 +41,7 @@ export function getFramePath(zeroBasedIndex: number): string {
   const base = import.meta.env.BASE_URL.endsWith('/')
     ? import.meta.env.BASE_URL
     : `${import.meta.env.BASE_URL}/`;
-  return `${base}frames/frame_${fileIndex}.jpg`;
+  return `${base}frames/frame_${fileIndex}.webp`;
 }
 
 export const WATCH_CHAPTERS: WatchChapter[] = [
